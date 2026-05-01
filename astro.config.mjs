@@ -1,33 +1,27 @@
-import { defineConfig } from 'astro/config';
+import { defineConfig, loadEnv } from 'astro/config'; // Importamos loadEnv
 import tailwindcss from '@tailwindcss/vite';
 import sanity from '@sanity/astro';
 
-// https://astro.build
+// Cargamos las variables de entorno de Netlify manualmente
+const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET } = loadEnv(process.env.NODE_ENV, process.cwd(), "");
+
 export default defineConfig({
     image: {
-        // Esto permite que las imágenes de tus noticias se carguen correctamente
         domains: ['cdn.sanity.io']
     },
     integrations: [
         sanity({
-            // Usamos process.env para que Netlify inyecte las variables correctamente
-            projectId: process.env.PUBLIC_SANITY_PROJECT_ID,
-            dataset: process.env.PUBLIC_SANITY_DATASET || 'production',
+            // Ahora usamos las constantes que cargamos arriba
+            projectId: PUBLIC_SANITY_PROJECT_ID,
+            dataset: PUBLIC_SANITY_DATASET || 'production',
             useCdn: true,
-            apiVersion: '2024-03-01', // Versión de API recomendada
-            visualEditing: {
-                enabled: false // Desactivado por ahora para evitar errores de pre-renderizado
-            }
+            apiVersion: '2024-03-01',
         })
     ],
     vite: {
         plugins: [tailwindcss()],
         server: {
-            // Esto evita problemas de conexión en entornos de preview
             allowedHosts: ['.netlify.app']
         }
-    },
-    server: {
-        port: 3000
     }
 });
