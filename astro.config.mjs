@@ -11,19 +11,15 @@ export default defineConfig({
     },
     integrations: [
         sanity({
-            projectId: env.PUBLIC_SANITY_PROJECT_ID,
-            dataset: env.PUBLIC_SANITY_DATASET || 'production',
+            // Intentamos leer PUBLIC primero, si no, usamos el de STUDIO
+            projectId: env.PUBLIC_SANITY_PROJECT_ID || env.SANITY_STUDIO_PROJECT_ID,
+            dataset: env.PUBLIC_SANITY_DATASET || env.SANITY_STUDIO_DATASET || 'production',
             useCdn: true,
             apiVersion: '2024-03-01',
         })
     ],
     vite: {
         plugins: [tailwindcss()],
-        // Esto asegura que las variables estén disponibles en el cliente y servidor
-        define: {
-            'process.env.PUBLIC_SANITY_PROJECT_ID': JSON.stringify(env.PUBLIC_SANITY_PROJECT_ID),
-            'process.env.PUBLIC_SANITY_DATASET': JSON.stringify(env.PUBLIC_SANITY_DATASET)
-        },
         server: {
             allowedHosts: ['.netlify.app']
         }
