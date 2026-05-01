@@ -3,7 +3,11 @@ import { loadEnv } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import sanity from '@sanity/astro';
 
+// Cargamos TODAS las posibles variantes de variables
 const env = loadEnv(process.env.NODE_ENV || 'production', process.cwd(), '');
+
+const projectId = env.PUBLIC_SANITY_PROJECT_ID || env.SANITY_STUDIO_PROJECT_ID || "";
+const dataset = env.PUBLIC_SANITY_DATASET || env.SANITY_STUDIO_DATASET || "production";
 
 export default defineConfig({
     image: {
@@ -11,15 +15,21 @@ export default defineConfig({
     },
     integrations: [
         sanity({
-            // Intentamos leer PUBLIC primero, si no, usamos el de STUDIO
-            projectId: env.PUBLIC_SANITY_PROJECT_ID || env.SANITY_STUDIO_PROJECT_ID,
-            dataset: env.PUBLIC_SANITY_DATASET || env.SANITY_STUDIO_DATASET || 'production',
+            projectId: projectId,
+            dataset: dataset,
             useCdn: true,
             apiVersion: '2024-03-01',
+            // Desactivamos esto para asegurar que el build termine
+            visualEditing: false 
         })
     ],
     vite: {
         plugins: [tailwindcss()],
+        // Forzamos a Vite a reconocer estas variables en cualquier parte del código
+        define: {
+            'process.env.PUBLIC_SANITY_PROJECT_ID': JSON.stringify(projectId),
+            'process.env.PUBLIC_SANITY_DATASET': JSON.stringify(dataset),
+        },
         server: {
             allowedHosts: ['.netlify.app']
         }
